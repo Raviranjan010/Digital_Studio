@@ -1,0 +1,499 @@
+@import "tailwindcss";
+
+/* Amiamie Regular */
+@font-face {
+  font-family: "Amiamie";
+  src: url("/fonts/amiamie/otf/Amiamie-Regular.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Amiamie Regular Italic */
+@font-face {
+  font-family: "Amiamie";
+  src: url("/fonts/amiamie/otf/Amiamie-Italic.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Amiamie Light */
+@font-face {
+  font-family: "Amiamie";
+  src: url("/fonts/amiamie/otf/Amiamie-Light.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Amiamie Light Italic */
+@font-face {
+  font-family: "Amiamie";
+  src: url("/fonts/amiamie/otf/Amiamie-LightItalic.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-LightItalic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Amiamie Black */
+@font-face {
+  font-family: "Amiamie";
+  src: url("/fonts/amiamie/otf/Amiamie-Black.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Amiamie Black Italic */
+@font-face {
+  font-family: "Amiamie";
+  src: url("/fonts/amiamie/otf/Amiamie-BlackItalic.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-BlackItalic.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Amiamie-Round Variants (if needed separately) */
+@font-face {
+  font-family: "Amiamie-Round";
+  src: url("/fonts/amiamie/otf/Amiamie-RegularRound.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-RegularRound.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amiamie-Round";
+  src: url("/fonts/amiamie/otf/Amiamie-BlackRound.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-BlackRound.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amiamie-Round";
+  src: url("/fonts/amiamie/otf/Amiamie-BlackItalicRound.otf") format("opentype"),
+    url("/fonts/amiamie/ttf/Amiamie-BlackItalicRound.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@theme {
+  --color-primary: #e5e5e0;
+  --color-DarkLava: #393632;
+  --color-SageGray: #8b8b73;
+  --color-gold: #cfa355;
+  --font-amiamie: "Amiamie", sans-serif;
+  --font-amiamie-round: "Amiamie-Round", sans-serif;
+
+  --animate-marquee: marquee 40s infinite linear;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  font-family: var(--font-amiamie);
+
+  /* CSS Custom Properties for Contact Form & Framer Motion sections */
+  --gold: #cfa355;
+  --gold-dim: #a17f3f;
+  --gold-glow: rgba(207, 163, 85, 0.25);
+  --gold-rgb: 207, 163, 85;
+  --bg: #000000;
+  --text: #ffffff;
+  --text-muted-raw: rgba(255, 255, 255, 0.5);
+  --text-dim: rgba(255, 255, 255, 0.25);
+  --border-raw: rgba(255, 255, 255, 0.08);
+  --cloud: rgba(207, 163, 85, 0.04);
+}
+
+/* Cloud drift keyframes for footer orbs */
+@keyframes cloud-drift-a {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(20px, -15px) scale(1.02);
+  }
+
+  66% {
+    transform: translate(-15px, 10px) scale(0.98);
+  }
+}
+
+/* Draw line animation for SVG effects */
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Gradient horizontal rule */
+.gradient-hr {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Section spacing utility */
+.section-spacing {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+@utility clip-path {
+  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+}
+
+@utility banner-text-responsive {
+  @apply text-[62px] sm:text-[90px] md:text-[114px] lg:text-[152px] leading-9 sm:leading-[56px] md:leading-[74px] lg:leading-[96px];
+}
+
+@utility value-text-responsive {
+  @apply text-[18px] md:text-[20px] lg:text-[26px] xl:text-[32px];
+}
+
+@utility marquee-text-responsive {
+  @apply text-[28px] sm:text-[36px] lg:text-[42px];
+}
+
+@utility contact-text-responsive {
+  @apply text-[34px] sm:text-[52px] md:text-[62px] lg:text-[100px] leading-[1.15];
+}
+
+/* ═══════════════════════════════════════════════════
+   3D Certificates Carousel Section
+   ═══════════════════════════════════════════════════ */
+
+.cert-section {
+  position: relative;
+  width: 100%;
+  padding: 5rem 0;
+  background: #0a0a0c;
+  overflow: hidden;
+}
+
+/* Ambient background glow */
+.cert-section::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60vw;
+  height: 60vw;
+  max-width: 800px;
+  max-height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(207, 163, 85, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cert-section-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .cert-section-inner {
+    padding: 0 2.5rem;
+  }
+}
+
+/* ─── Header ─── */
+.cert-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: var(--font-amiamie);
+}
+
+.cert-label-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.cert-heading {
+  margin-top: 1rem;
+  font-family: var(--font-amiamie);
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1.15;
+  max-width: 42rem;
+}
+
+/* ─── Content Grid ─── */
+.cert-content-grid {
+  margin-top: 3.5rem;
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .cert-content-grid {
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+  }
+}
+
+/* ─── Canvas Wrapper ─── */
+.cert-canvas-wrap {
+  position: relative;
+  height: 25rem;
+  cursor: grab;
+  overflow: hidden;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.cert-canvas-wrap:active {
+  cursor: grabbing;
+}
+
+@media (min-width: 768px) {
+  .cert-canvas-wrap {
+    height: 31rem;
+  }
+}
+
+/* Edge fades */
+.cert-fade {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4rem;
+  z-index: 2;
+}
+
+@media (min-width: 768px) {
+  .cert-fade {
+    width: 6rem;
+  }
+}
+
+.cert-fade-left {
+  left: 0;
+  background: linear-gradient(to right, #0a0a0c, rgba(10, 10, 12, 0.7), transparent);
+}
+
+.cert-fade-right {
+  right: 0;
+  background: linear-gradient(to left, #0a0a0c, rgba(10, 10, 12, 0.7), transparent);
+}
+
+/* Drag hint */
+.cert-drag-hint {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  z-index: 3;
+  animation: cert-hint-pulse 2.5s ease-in-out infinite;
+}
+
+.cert-drag-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+@keyframes cert-hint-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* ─── Info Column ─── */
+.cert-info-col {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Detail Card (active cert) */
+.cert-detail-card {
+  position: relative;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.75rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
+.cert-detail-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(207, 163, 85, 0.4), transparent);
+}
+
+.cert-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cert-detail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: cert-dot-glow 2s ease-in-out infinite;
+}
+
+@keyframes cert-dot-glow {
+  0%, 100% { box-shadow: 0 0 4px currentColor; }
+  50% { box-shadow: 0 0 12px currentColor; }
+}
+
+.cert-detail-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.cert-detail-title {
+  margin-top: 0.75rem;
+  font-family: var(--font-amiamie);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+  transition: all 0.3s ease;
+}
+
+.cert-detail-meta {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.cert-detail-desc {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Progress bar */
+.cert-detail-bar {
+  margin-top: 1.25rem;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.cert-detail-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.5s ease;
+}
+
+.cert-detail-count {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.25);
+  text-align: right;
+}
+
+/* ─── Side Cards ─── */
+.cert-side-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .cert-side-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cert-side-card {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cert-side-card:hover {
+  border-color: rgba(207, 163, 85, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-2px);
+}
+
+.cert-side-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cert-side-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cert-side-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cert-side-meta {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.3);
+}

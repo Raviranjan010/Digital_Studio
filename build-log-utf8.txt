@@ -1,0 +1,196 @@
+﻿
+> awwwards-portfolio@0.0.0 build
+> vite build
+
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+node.exe : 
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (:St  
+  ring) [], RemoteExcept   
+ ion
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+/fonts/otf/Amiamie-Regular.
+otf referenced in /fonts/ot
+f/Amiamie-Regular.otf 
+didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/otf/Amiamie-Italic.o
+tf referenced in /fonts/otf
+/Amiamie-Italic.otf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/otf/Amiamie-Light.ot
+f referenced in /fonts/otf/
+Amiamie-Light.otf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/otf/Amiamie-LightIta
+lic.otf referenced in /font
+s/otf/Amiamie-LightItalic.o
+tf didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/otf/Amiamie-Black.ot
+f referenced in /fonts/otf/
+Amiamie-Black.otf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/otf/Amiamie-BlackIta
+lic.otf referenced in /font
+s/otf/Amiamie-BlackItalic.o
+tf didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/otf/Amiamie-RegularR
+ound.otf referenced in /fon
+ts/otf/Amiamie-RegularRound
+.otf didn't resolve at 
+build time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/otf/Amiamie-BlackRou
+nd.otf referenced in /fonts
+/otf/Amiamie-BlackRound.otf
+ didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/otf/Amiamie-BlackIta
+licRound.otf referenced in 
+/fonts/otf/Amiamie-BlackIta
+licRound.otf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/ttf/Amiamie-Regular.
+ttf referenced in /fonts/tt
+f/Amiamie-Regular.ttf 
+didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/ttf/Amiamie-Italic.t
+tf referenced in /fonts/ttf
+/Amiamie-Italic.ttf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/ttf/Amiamie-Light.tt
+f referenced in /fonts/ttf/
+Amiamie-Light.ttf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/ttf/Amiamie-LightIta
+lic.ttf referenced in /font
+s/ttf/Amiamie-LightItalic.t
+tf didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/ttf/Amiamie-Black.tt
+f referenced in /fonts/ttf/
+Amiamie-Black.ttf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+
+/fonts/ttf/Amiamie-BlackIta
+lic.ttf referenced in /font
+s/ttf/Amiamie-BlackItalic.t
+tf didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/ttf/Amiamie-RegularR
+ound.ttf referenced in /fon
+ts/ttf/Amiamie-RegularRound
+.ttf didn't resolve at 
+build time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/ttf/Amiamie-BlackRou
+nd.ttf referenced in /fonts
+/ttf/Amiamie-BlackRound.ttf
+ didn't resolve at build 
+time, it will remain 
+unchanged to be resolved 
+at runtime
+
+/fonts/ttf/Amiamie-BlackIta
+licRound.ttf referenced in 
+/fonts/ttf/Amiamie-BlackIta
+licRound.ttf didn't 
+resolve at build time, it 
+will remain unchanged to 
+be resolved at runtime
+[32mΓ£ô[39m 234 modules transformed.
+[31mΓ£ù[39m Build failed 
+in 2.24s
+[31merror during build:
+[31mCould not resolve "../
+../constants/certifications
+" from "src/components/3d/c
+ertificates/CarouselScene.j
+sx"[31m
+file: [36mD:/Portfolio/AWW
+WARDS-Standard_Portfolio-We
+bsite-main/src/components/3
+d/certificates/CarouselScen
+e.jsx[31m
+    at getRollupError (file
+:///D:/Portfolio/AWWWARDS-S
+tandard_Portfolio-Website-m
+ain/node_modules/rollup/dis
+t/es/shared/parseAst.js:400
+:41)
+    at error (file:///D:/Po
+rtfolio/AWWWARDS-Standard_P
+ortfolio-Website-main/node_
+modules/rollup/dist/es/shar
+ed/parseAst.js:396:42)
+    at ModuleLoader.handleI
+nvalidResolvedId (file:///D
+:/Portfolio/AWWWARDS-Standa
+rd_Portfolio-Website-main/n
+ode_modules/rollup/dist/es/
+shared/node-entry.js:21379:
+24)
+    at file:///D:/Portfolio
+/AWWWARDS-Standard_Portfoli
+o-Website-main/node_modules
+/rollup/dist/es/shared/node
+-entry.js:21339:26[39m
