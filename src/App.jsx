@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./sections/Navbar";
-import Hero from "./sections/Hero";
+import PremiumHero from "./sections/PremiumHero";
 import Services from "./sections/Services";
 import ReactLenis from "lenis/react";
 import About from "./sections/About";
@@ -49,11 +49,11 @@ const App = () => {
           } transition-opacity duration-1000`}
       >
         <Navbar />
-        <Hero />
-        <Services />
+        <PremiumHero />
         <About />
-        <Works />
         <TechStack />
+        <Services />
+        <Works />
         <CertificatesSection />
         <Contact />
         <FooterSection />

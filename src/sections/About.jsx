@@ -1,685 +1,614 @@
-import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useScroll,
+  AnimatePresence
+} from "framer-motion";
 
-gsap.registerPlugin(ScrollTrigger);
+const MotionDiv = motion.div;
+const MotionArticle = motion.article;
+const MotionPath = motion.path;
+const MotionSpan = motion.span;
 
-const profileData = {
-  name: "Ravi Ranjan Kashyap",
-  role: "Full Stack Developer & UI/UX Enthusiast",
-  location: "Bihar, India",
-  education: "Lovely Professional University",
-  experience: "02 Years",
-  projects: "20+",
-  specialization: ["Modern Web Apps", "AI Integration", "Performance Optimization"],
-  philosophy: "Great ideas deserve exceptional execution",
-  currently: "Building impactful digital experiences"
+const disciplines = [
+  {
+    icon: "M5 17.5 14 4l5 13.5M9 10.5H3.5L8 6m7 4.5h5.5L16 6",
+    title: "Development",
+    body: "Clean front-end systems with sharp structure, readable components, and performance-aware interactions.",
+    meta: "JavaScript, React, APIs",
+  },
+  {
+    icon: "M4 8.5 12 4l8 4.5-8 4.5L4 8.5Zm0 5 8 4.5 8-4.5M4 18.5l8 4.5 8-4.5",
+    title: "Design",
+    body: "Interface direction built around hierarchy, spacing, restraint, and polished product-like presentation.",
+    meta: "UI/UX, Apps, Web",
+  },
+  {
+    icon: "M4 6.5h16v11H4v-11Zm4 0v11m8-11v11m-5-7 4 2.5-4 2.5v-5Z",
+    title: "Video Editing",
+    body: "Editing and motion sensibility that helps digital products feel cinematic without losing usability.",
+    meta: "Premiere Pro, After Effects, DaVinci Resolve",
+  },
+];
+
+const statsData = {
+  Dev: [
+    { value: "02", label: "Years JS" },
+    { value: "+20", label: "Repositories" },
+    { value: "01", label: "Framework" },
+  ],
+  Design: [
+    { value: "04", label: "UI Kits" },
+    { value: "+10", label: "Prototypes" },
+    { value: "99", label: "Layers" },
+  ],
+  Editor: [
+    { value: "03", label: "Timelines" },
+    { value: "4K", label: "Resolutions" },
+    { value: "24", label: "FPS" },
+  ]
 };
 
-const metrics = [
-  { 
-    value: "02+", 
-    label: "Years Experience", 
-    suffix: "",
-    gradient: "from-amber-400 via-yellow-500 to-amber-600"
-  },
-  { 
-    value: "20", 
-    label: "Projects Delivered", 
-    suffix: "+",
-    gradient: "from-yellow-400 via-amber-500 to-yellow-600"
-  },
-  { 
-    value: "100", 
-    label: "Client Satisfaction", 
-    suffix: "%",
-    gradient: "from-amber-500 via-yellow-400 to-amber-500"
-  },
-  { 
-    value: "24", 
-    label: "Support", 
-    suffix: "/7",
-    gradient: "from-yellow-500 via-amber-400 to-yellow-500"
-  },
-];
+const codeLinesData = {
+  Dev: [
+    '{ "name": "Ravi Ranjan",',
+    '  "role": "Frontend Developer",',
+    '  "focus": "Performant Systems",',
+    '  "stack": ["JavaScript", "React"],',
+    '  "status": "Compiling..." }',
+  ],
+  Design: [
+    '{ "name": "Ravi Ranjan",',
+    '  "role": "UI/UX Designer",',
+    '  "focus": "Aesthetics & Flow",',
+    '  "tool": "Figma",',
+    '  "status": "Aligning to grid..." }',
+  ],
+  Editor: [
+    '{ "name": "Ravi Ranjan",',
+    '  "role": "Motion & Video",',
+    '  "focus": "Cinematic Cuts",',
+    '  "tool": "Premiere Pro",',
+    '  "status": "Rendering..." }',
+  ]
+};
 
-const skills = [
-  {
-    category: "Frontend Excellence",
-    description: "Crafting pixel-perfect, responsive interfaces with modern frameworks and cutting-edge animation libraries.",
-    technologies: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Framer Motion", "GSAP"],
-    color: "#d4af37"
-  },
-  {
-    category: "Backend Architecture",
-    description: "Building scalable, secure server-side solutions with robust API design and database optimization.",
-    technologies: ["Node.js", "Express", "MongoDB", "PostgreSQL", "REST APIs", "GraphQL"],
-    color: "#ffd700"
-  },
-  {
-    category: "Design & Experience",
-    description: "Creating intuitive user experiences through research-driven design and interaction patterns.",
-    technologies: ["Figma", "Adobe XD", "UI/UX Design", "Prototyping", "User Research", "Accessibility"],
-    color: "#cfb53b"
-  },
-];
+const springConfig = { stiffness: 170, damping: 24, mass: 0.7 };
 
-/* ══════════════════════════════════════════════════════════════
-   ANIMATED COUNTER COMPONENT
-   ══════════════════════════════════════════════════════════════ */
-const AnimatedCounter = ({ value, suffix = "", duration = 2 }) => {
-  const [count, setCount] = useState(0);
-  const nodeRef = useRef(null);
+// 1. Audio Synthesis for Low-Latency UI Sounds
+const playSound = (type) => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    if (type === "click") {
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } else if (type === "pop") {
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    }
+  } catch (e) {
+    // silently fail
+  }
+};
 
-  useEffect(() => {
-    const node = nodeRef.current;
-    if (!node) return;
+// 2. Magnetic Button Wrapper
+const MagneticButton = ({ children, onClick, active }) => {
+  const ref = useRef(null);
+  const position = { x: useMotionValue(0), y: useMotionValue(0) };
+  const springX = useSpring(position.x, { stiffness: 200, damping: 10, mass: 0.5 });
+  const springY = useSpring(position.y, { stiffness: 200, damping: 10, mass: 0.5 });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          const targetValue = parseInt(value);
-          const increment = targetValue / (duration * 60);
-          let current = 0;
+  const handlePointerMove = (e) => {
+    if(!ref.current) return;
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    position.x.set(middleX * 0.3); 
+    position.y.set(middleY * 0.3);
+  };
 
-          const timer = setInterval(() => {
-            current += increment;
-            if (current >= targetValue) {
-              setCount(targetValue);
-              clearInterval(timer);
-            } else {
-              setCount(Math.floor(current));
-            }
-          }, 1000 / 60);
-
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [value, duration]);
+  const handlePointerLeave = () => {
+    position.x.set(0);
+    position.y.set(0);
+  };
 
   return (
-    <span ref={nodeRef}>
-      {count}{suffix}
-    </span>
+    <motion.button
+      ref={ref}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      onClick={() => {
+         playSound("click");
+         onClick();
+      }}
+      animate={{ x: springX, y: springY }}
+      whileTap={{ scale: 0.92 }}
+      className={`relative z-20 rounded-md border px-4 py-2 text-xs font-black uppercase tracking-[0.22em] transition-colors duration-300 ${
+        active
+          ? "border-[#b59765] bg-[#6f5b3d] text-[#f8ecd9]"
+          : "border-[#4f473d] bg-[#1b1b19] text-[#9d968a] hover:border-[#a5885b] hover:text-[#e0c390]"
+      }`}
+    >
+      {children}
+    </motion.button>
   );
 };
 
-/* ══════════════════════════════════════════════════════════════
-   SECTION REVEAL WRAPPER
-   ══════════════════════════════════════════════════════════════ */
-const SectionReveal = ({ children, delay = 0 }) => {
-  const ref = useRef(null);
+const MagneticCard = ({ children, className, as = "article", draggable = false }) => {
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(pointerY, [-1, 1], [4, -4]), springConfig);
+  const rotateY = useSpring(useTransform(pointerX, [-1, 1], [-4, 4]), springConfig);
+  const Component = as === "div" ? MotionDiv : MotionArticle;
 
-  useGSAP(() => {
-    gsap.from(ref.current, {
-      y: 100,
-      opacity: 0,
-      duration: 1.2,
-      delay,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ref.current,
-        start: "top 85%",
-        toggleActions: "play none none reverse",
-      },
-    });
-  }, [delay]);
+  const handlePointerMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    pointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 2);
+    pointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 2);
+  };
 
-  return <div ref={ref}>{children}</div>;
+  const handlePointerLeave = () => {
+    pointerX.set(0);
+    pointerY.set(0);
+  };
+
+  return (
+    <Component
+      drag={draggable}
+      dragElastic={0.16}
+      dragMomentum={false}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      className={className}
+    >
+      {children}
+    </Component>
+  );
 };
 
-/* ══════════════════════════════════════════════════════════════
-   MAIN ABOUT COMPONENT
-   ══════════════════════════════════════════════════════════════ */
+// 3. Liquid Morphing Blob Component
+const LiquidBlob = ({ activeTab }) => {
+  const variants = {
+    Dev: {
+      borderRadius: ["10%", "10%", "10%"],
+      rotate: [0, 90],
+      scale: 1,
+      backgroundColor: "rgba(181,151,101,0.08)"
+    },
+    Design: {
+      borderRadius: ["30% 70% 70% 30% / 30% 30% 70% 70%", "60% 40% 30% 70% / 60% 30% 70% 40%"],
+      rotate: [90, 180, 270],
+      scale: 1.1,
+      backgroundColor: "rgba(224,195,144,0.06)"
+    },
+    Editor: {
+      borderRadius: ["50%", "50%", "50%"],
+      rotate: [0, -90],
+      scale: 0.9,
+      backgroundColor: "rgba(111,91,61,0.12)"
+    }
+  };
+
+  return (
+    <motion.div
+      variants={variants}
+      animate={activeTab}
+      transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" }}
+      className="pointer-events-none absolute left-1/2 top-1/2 h-[35rem] w-[35rem] -translate-x-1/2 -translate-y-1/2 mix-blend-screen blur-3xl"
+    />
+  );
+};
+
+// 4. Skeleton to Terminal Reveal
+const TerminalReveal = ({ activeTab }) => {
+  const terminalRef = useRef(null);
+  const isInView = useInView(terminalRef, { once: true, amount: 0.3 });
+  const terminalText = useMemo(() => codeLinesData[activeTab].join("\n"), [activeTab]);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  useEffect(() => {
+    setVisibleCount(0);
+    setShowSkeleton(true);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!isInView) return undefined;
+    
+    // Artificial delay to show skeleton shimmering before shatter
+    const shatterTimer = window.setTimeout(() => {
+      playSound("pop");
+      setShowSkeleton(false);
+
+      const typeTimer = window.setInterval(() => {
+        setVisibleCount((count) => {
+          if (count >= terminalText.length) {
+            window.clearInterval(typeTimer);
+            return count;
+          }
+          return count + 1;
+        });
+      }, 18);
+      return () => window.clearInterval(typeTimer);
+    }, 800);
+
+    return () => window.clearTimeout(shatterTimer);
+  }, [isInView, activeTab, terminalText.length]);
+
+  return (
+    <div ref={terminalRef} className="relative min-h-[16rem]">
+      <AnimatePresence mode="wait">
+        {showSkeleton ? (
+          <motion.div 
+            key="skeleton"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0, 
+              scale: 1.05, 
+              filter: "blur(10px)",
+              transition: { duration: 0.4, ease: "easeOut" } 
+            }}
+            className="absolute inset-0 flex flex-col gap-3 px-6 py-5"
+          >
+             {[60, 80, 70, 90, 50].map((width, i) => (
+                <motion.div 
+                  key={i}
+                  animate={{ opacity: [0.3, 0.7, 0.3] }}
+                  transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.1 }}
+                  className="h-4 rounded bg-[#3a352c]" 
+                  style={{ width: `${width}%` }} 
+                />
+             ))}
+          </motion.div>
+        ) : (
+          <motion.pre
+            key="terminal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="whitespace-pre-wrap px-6 py-5 font-mono text-[0.95rem] leading-8 text-[#ead8b7] sm:text-lg"
+          >
+            {terminalText.slice(0, visibleCount)}
+            <MotionSpan
+              className="ml-1 inline-block text-[#f2dfb8]"
+              animate={{ opacity: [0, 1, 1, 0] }}
+              transition={{ duration: 0.9, repeat: Infinity }}
+            >
+              |
+            </MotionSpan>
+          </motion.pre>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// 5. Glassmorphic Shard
+const GlassShard = ({ children, top, left, parallaxRef, speed }) => {
+  const { scrollYProgress } = useScroll({ target: parallaxRef, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [-100 * speed, 100 * speed]);
+  return (
+    <motion.div
+      style={{ top, left, y }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.8 }}
+      className="absolute z-20 flex items-center justify-center p-3 rounded-2xl border border-white/[0.08] bg-white/[0.015] backdrop-blur-[12px] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] pointer-events-none"
+    >
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-60" />
+      {children}
+    </motion.div>
+  );
+};
+
+// 6. Stop Motion Image Carousel
+const StopMotionImage = () => {
+  const images = ["/photos/ravi1.jpg", "/photos/ravi2.png", "/photos/ravi3.png", "/photos/ravi4.png"];
+  const [hovered, setHovered] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (!hovered) {
+      setIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 150);
+    return () => clearInterval(interval);
+  }, [hovered]);
+
+  return (
+    <div 
+      className="aspect-[4/5] w-full relative group/sm overflow-hidden"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {images.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt={`Ravi Ranjan ${i}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-[filter] duration-500 rounded-lg border border-[#6a6154] grayscale group-hover/sm:grayscale-0 ${i === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+        />
+      ))}
+    </div>
+  );
+};
+
 const About = () => {
   const sectionRef = useRef(null);
-  const heroRef = useRef(null);
-  const profileCardRef = useRef(null);
-  const [activeSkill, setActiveSkill] = useState(0);
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [activeTab, setActiveTab] = useState("Dev");
+  const stats = statsData[activeTab];
+  
+  // Mouse parallax setup
+  const cursorX = useMotionValue(0);
+  const cursorY = useMotionValue(0);
+  const parallaxX = useSpring(useTransform(cursorX, [-1, 1], [18, -18]), springConfig);
+  const parallaxY = useSpring(useTransform(cursorY, [-1, 1], [12, -12]), springConfig);
+  const nearParallaxX = useSpring(useTransform(cursorX, [-1, 1], [-30, 30]), springConfig);
+  const nearParallaxY = useSpring(useTransform(cursorY, [-1, 1], [-18, 18]), springConfig);
+  const spotlightX = useSpring(useTransform(cursorX, [-1, 1], ["8%", "92%"]), springConfig);
+  const spotlightY = useSpring(useTransform(cursorY, [-1, 1], ["10%", "90%"]), springConfig);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
+  // Scrollytelling Setup
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start center", "end center"] });
+  const scrollLineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
-  const y = useSpring(useTransform(scrollYProgress, [0, 1], [0, 300]), {
-    stiffness: 100,
-    damping: 30,
-  });
+  const handlePointerMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    cursorX.set(((event.clientX - rect.left) / rect.width - 0.5) * 2);
+    cursorY.set(((event.clientY - rect.top) / rect.height - 0.5) * 2);
+  };
 
-  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
-
-  // GSAP Animations
-  useGSAP(() => {
-    // Hero section animation
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: heroRef.current,
-        start: "top center",
-        end: "bottom center",
-        scrub: 1,
-      },
-    });
-
-    tl.to(heroRef.current, {
-      scale: 0.95,
-      borderRadius: "32px",
-      ease: "none",
-    });
-
-    // Profile card 3D tilt effect
-    if (profileCardRef.current) {
-      gsap.to(profileCardRef.current, {
-        scrollTrigger: {
-          trigger: profileCardRef.current,
-          start: "top center",
-          end: "bottom center",
-          scrub: 1,
-        },
-        rotateY: 5,
-        rotateX: -5,
-        ease: "none",
-      });
-    }
-
-    // Parallax elements
-    gsap.utils.toArray(".parallax-slow").forEach((element) => {
-      gsap.to(element, {
-        y: -80,
-        scrollTrigger: {
-          trigger: element,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
-    });
-
-    gsap.utils.toArray(".parallax-fast").forEach((element) => {
-      gsap.to(element, {
-        y: -150,
-        scrollTrigger: {
-          trigger: element,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
-    });
-  }, []);
-
-  // Cursor tracking
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setCursorPosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 30,
-        y: (e.clientY / window.innerHeight - 0.5) * 30,
-      });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  const resetPointer = () => {
+    cursorX.set(0);
+    cursorY.set(0);
+  };a
 
   return (
     <section
       ref={sectionRef}
       id="about"
-      className="relative min-h-screen bg-black overflow-hidden"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetPointer}
+      className="group/about relative bg-[#080807] px-5 py-24 text-[#eee6d8] sm:px-8 lg:px-12"
     >
-      {/* ═══════════════════════════════════════════
-          BACKGROUND ELEMENTS
-          ═══════════════════════════════════════════ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Mesh gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
-        
-        {/* Animated gradient orbs */}
-        <motion.div
-          className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full opacity-20"
-          style={{
-            background: "radial-gradient(circle, rgba(212,175,55,0.4) 0%, transparent 70%)",
-            filter: "blur(120px)",
-            x: cursorPosition.x,
-            y: cursorPosition.y,
-          }}
-        />
-        
-        <motion.div
-          className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full opacity-15"
-          style={{
-            background: "radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%)",
-            filter: "blur(100px)",
-            x: -cursorPosition.x,
-            y: -cursorPosition.y,
-          }}
-        />
-
-        {/* Noise texture overlay */}
-        <div 
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' /%3E%3C/svg%3E")`,
-          }}
-        />
-
-        {/* Geometric grid */}
-        <div 
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, rgba(212,175,55,0.3) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(212,175,55,0.3) 1px, transparent 1px)
-            `,
-            backgroundSize: "80px 80px",
-          }}
-        />
+      {/* Dynamic Scrollytelling Progress Line */}
+      <div className="absolute left-8 top-0 bottom-0 w-px bg-[#2a251e] hidden lg:block z-0">
+         <motion.div style={{ height: scrollLineHeight }} className="w-full bg-gradient-to-b from-[#a5885b] to-transparent" />
       </div>
 
-      {/* ═══════════════════════════════════════════
-          MAIN CONTENT
-          ═══════════════════════════════════════════ */}
-      <div className="relative z-10">
-        
-        {/* Hero Section */}
-        <div ref={heroRef} className="px-6 md:px-12 lg:px-20 pt-32 pb-20">
-          <div className="max-w-7xl mx-auto">
-            
-            {/* Section label */}
-            <SectionReveal delay={0}>
-              <div className="flex items-center gap-4 mb-12">
-                <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500/50" />
-                <span className="font-mono text-xs tracking-[0.3em] uppercase text-amber-500/70">
-                  About Me
-                </span>
-              </div>
-            </SectionReveal>
+      <LiquidBlob activeTab={activeTab} />
 
-            {/* Main heading */}
-            <SectionReveal delay={0.1}>
-              <h2 className="mb-8">
-                <div className="overflow-hidden">
-                  <motion.div
-                    initial={{ y: "100%" }}
-                    whileInView={{ y: 0 }}
-                    viewport={{ once: false }}
-                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                    className="text-6xl md:text-8xl lg:text-9xl font-bold text-white leading-none mb-4"
-                  >
-                    Crafting Digital
-                  </motion.div>
-                </div>
-                <div className="overflow-hidden">
-                  <motion.div
-                    initial={{ y: "100%" }}
-                    whileInView={{ y: 0 }}
-                    viewport={{ once: false }}
-                    transition={{ duration: 1, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                    className="text-6xl md:text-8xl lg:text-9xl font-bold leading-none bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent"
-                  >
-                    Experiences
-                  </motion.div>
-                </div>
+      <MotionDiv
+        className="pointer-events-none absolute z-20 hidden h-8 w-8 rounded-full border border-[#d8c49e] opacity-0 mix-blend-difference transition-opacity duration-300 group-hover/about:opacity-80 lg:block"
+        style={{ left: spotlightX, top: spotlightY, x: "-50%", y: "-50%" }}
+      />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{
+        backgroundImage:
+          "linear-gradient(to right, rgba(231,211,177,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(231,211,177,0.5) 1px, transparent 1px)",
+        backgroundSize: "72px 72px",
+      }} />
+
+      <div className="relative z-10 mx-auto max-w-[1460px]">
+        {/* Header area */}
+        <div className="relative z-30 mb-10 flex items-center gap-5 w-fit pr-4">
+          <span className="h-px w-16 bg-[#8d7654]" />
+          <p className="text-xs font-semibold uppercase tracking-[0.48em] text-[#9c9589]">
+            Who I Am
+          </p>
+          <span className="h-px w-24 bg-[#3b352c]" />
+        </div>
+
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(500px,0.92fr)] lg:items-start relative">
+          
+          {/* Glass shards scattered around text */}
+          <GlassShard top="0%" left="80%" parallaxRef={sectionRef} speed={1.5}>
+              <span className="text-xs text-[#a5885b] font-mono">&lt;Ravi /&gt;</span>
+          </GlassShard>
+          <GlassShard top="20%" left="-5%" parallaxRef={sectionRef} speed={0.8}>
+              <svg className="w-5 h-5 text-[#a5885b]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+          </GlassShard>
+
+          <div>
+            <MotionDiv
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Expressive Typography Hook via inline CSS var manipulation or simple hover block */}
+              <h2 className="transition-all duration-300 hover:font-[900] hover:tracking-[0.02em] font-[var(--font-amiamie-round)] text-[clamp(3.6rem,8vw,8.8rem)] font-black uppercase leading-[0.82] tracking-[-0.075em] text-[#e7d3b1]">
+                About Me
               </h2>
-            </SectionReveal>
 
-            {/* Subtitle */}
-            <SectionReveal delay={0.2}>
-              <p className="text-xl md:text-2xl text-neutral-400 max-w-2xl font-light">
-                Where innovation meets execution. Building digital products that users love and businesses rely on.
+              <p className="mt-7 max-w-3xl text-lg leading-9 text-[#ded6ca] transition-colors duration-300 group-hover/about:text-[#efe5d7] md:text-2xl md:leading-[1.65]">
+                I design and build digital systems where logic meets experience.
+                Every interface I create is structured, intentional, and built for 
+                <span className="font-bold text-[#f4eadb] transition-all duration-500 hover:tracking-widest"> PERFORMANCE</span>.
               </p>
-            </SectionReveal>
-          </div>
-        </div>
+            </MotionDiv>
 
-        {/* Divider line */}
-        <div className="px-6 md:px-12 lg:px-20">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="h-px w-full bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: false }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-            />
-          </div>
-        </div>
-
-        {/* Content Grid */}
-        <div className="px-6 md:px-12 lg:px-20 py-20">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-              
-              {/* LEFT COLUMN - Story & Metrics */}
-              <div className="lg:col-span-7 space-y-16">
-                
-                {/* Story */}
-                <SectionReveal delay={0.1}>
-                  <div className="space-y-8">
-                    <h3 className="text-3xl md:text-4xl font-bold text-white">
-                      Building the Future, One Line at a Time
-                    </h3>
-                    
-                    <div className="space-y-6 text-lg text-neutral-400 leading-relaxed">
-                      <p>
-                        I'm <span className="text-amber-400 font-medium">Ravi Ranjan</span>, a Full Stack Developer 
-                        based in Bihar, India. Currently pursuing Computer Science at Lovely Professional University, 
-                        I specialize in creating sophisticated web applications that bridge design and functionality.
-                      </p>
-                      
-                      <p>
-                        My approach combines <span className="text-white">technical precision</span> with 
-                        {" "}<span className="text-white">creative vision</span>. I believe exceptional digital 
-                        products emerge from the intersection of clean code, thoughtful design, and user-centered thinking.
-                      </p>
-                      
-                      <p>
-                        With over 2 years of experience and 20+ completed projects, I've developed a deep understanding 
-                        of modern web technologies, performance optimization, and creating interfaces that feel natural 
-                        and responsive.
-                      </p>
-                    </div>
-                  </div>
-                </SectionReveal>
-
-                {/* Metrics Grid */}
-                <SectionReveal delay={0.2}>
-                  <div className="grid grid-cols-2 gap-6">
-                    {metrics.map((metric, index) => (
-                      <motion.div
-                        key={metric.label}
-                        className="group relative p-8 rounded-2xl border border-neutral-800 bg-neutral-900/30 backdrop-blur-sm overflow-hidden"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: false }}
-                        transition={{ delay: index * 0.1, duration: 0.6 }}
-                        whileHover={{ 
-                          borderColor: "rgba(212,175,55,0.5)",
-                          backgroundColor: "rgba(212,175,55,0.05)",
-                          y: -5
-                        }}
-                      >
-                        {/* Glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/10 group-hover:to-transparent transition-all duration-500" />
-                        
-                        <div className="relative z-10">
-                          <div className={`text-5xl md:text-6xl font-bold mb-3 bg-gradient-to-r ${metric.gradient} bg-clip-text text-transparent`}>
-                            <AnimatedCounter value={metric.value} suffix={metric.suffix} />
-                          </div>
-                          <div className="text-sm text-neutral-500 uppercase tracking-wider">
-                            {metric.label}
-                          </div>
-                        </div>
-
-                        {/* Corner accent */}
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-amber-500/20 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      </motion.div>
-                    ))}
-                  </div>
-                </SectionReveal>
-
-                {/* Skills Section */}
-                <SectionReveal delay={0.3}>
-                  <div className="space-y-6">
-                    <h3 className="text-2xl font-bold text-white mb-8">
-                      Expertise & Capabilities
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      {skills.map((skill, index) => (
-                        <motion.div
-                          key={skill.category}
-                          className="group relative"
-                          onHoverStart={() => setActiveSkill(index)}
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: false }}
-                          transition={{ delay: index * 0.1, duration: 0.6 }}
-                        >
-                          <div className="relative p-6 rounded-xl border border-neutral-800 bg-neutral-900/30 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-amber-500/50">
-                            
-                            {/* Active indicator */}
-                            <motion.div
-                              className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-yellow-600"
-                              initial={{ scaleY: 0 }}
-                              animate={{ scaleY: activeSkill === index ? 1 : 0 }}
-                              transition={{ duration: 0.3 }}
-                            />
-
-                            <div className="space-y-3 pl-2">
-                              <h4 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-                                {skill.category}
-                              </h4>
-                              
-                              <p className="text-neutral-400 leading-relaxed">
-                                {skill.description}
-                              </p>
-                              
-                              <div className="flex flex-wrap gap-2 pt-2">
-                                {skill.technologies.map((tech) => (
-                                  <span
-                                    key={tech}
-                                    className="px-3 py-1 text-xs font-mono rounded-full border border-neutral-700 bg-neutral-800/50 text-neutral-300 hover:border-amber-500/50 hover:text-amber-400 transition-colors"
-                                  >
-                                    {tech}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </SectionReveal>
+            <MagneticCard
+              as="div"
+              className="mt-10 max-w-3xl cursor-default overflow-hidden rounded-[1.35rem] border border-[#5d5346] bg-[#151513] shadow-[0_26px_70px_rgba(0,0,0,0.42)] transition-colors duration-300 hover:border-[#a5885b]"
+            >
+              <div className="flex items-center gap-5 border-b border-[#4b443a] px-6 py-5 sm:px-7">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#a5885b] bg-[#d7bd8a] text-[#11100e]">
+                  <svg viewBox="0 0 24 24" className="h-9 w-9" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M20 21a8 8 0 0 0-16 0" />
+                    <circle cx="12" cy="8" r="4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black tracking-[-0.03em] text-[#f4eadb] md:text-3xl">
+                    Ravi Ranjan
+                  </h3>
+                  <p className="mt-1 text-base text-[#d1c6b4] md:text-lg">
+                    Developer - Designer - Video Editor
+                  </p>
+                </div>
               </div>
 
-              {/* RIGHT COLUMN - Visual Elements */}
-              <div className="lg:col-span-5 space-y-8 parallax-slow">
-                
-                {/* Profile Card */}
-                <SectionReveal delay={0.2}>
-                  <motion.div
-                    ref={profileCardRef}
-                    className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black"
-                    style={{ 
-                      transformStyle: "preserve-3d",
-                      perspective: "1000px"
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-transparent to-yellow-500/20 opacity-50" />
-                    
-                    {/* Animated border glow */}
-                    <motion.div
-                      className="absolute inset-0"
-                      style={{
-                        background: "linear-gradient(45deg, #d4af37, #ffd700, #cfb53b, #e5c100, #d4af37)",
-                        backgroundSize: "400% 400%",
-                      }}
-                      animate={{
-                        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                      }}
-                      transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
+              <div className="grid divide-y divide-[#403a32] p-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <AnimatePresence mode="popLayout">
+                  {stats.map((item, i) => (
+                    <motion.div 
+                      key={item.label} 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="px-4 py-4 text-center"
                     >
-                      <div className="absolute inset-[2px] rounded-3xl bg-gradient-to-br from-neutral-900 to-black" />
+                      <span className="font-[var(--font-amiamie-round)] text-4xl font-black tracking-[-0.06em] text-[#e0c390]">
+                        {item.value}
+                      </span>
+                      <span className="ml-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#a79c8d]">
+                        {item.label}
+                      </span>
                     </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </MagneticCard>
+          </div>
 
-                    {/* Content */}
-                    <div className="relative z-10 h-full flex flex-col items-center justify-center p-10 text-center">
-                      
-                      {/* Monogram */}
-                      <motion.div
-                        className="relative mb-8"
-                        initial={{ scale: 0, rotate: -180 }}
-                        whileInView={{ scale: 1, rotate: 0 }}
-                        viewport={{ once: false }}
-                        transition={{ 
-                          duration: 1.2, 
-                          ease: [0.34, 1.56, 0.64, 1]
-                        }}
-                      >
-                        <div className="text-9xl font-black text-transparent bg-gradient-to-br from-amber-400 to-yellow-600 bg-clip-text">
-                          RR
-                        </div>
-                        
-                        {/* Orbital rings */}
-                        <motion.div
-                          className="absolute inset-0 border-2 border-amber-500/30 rounded-full"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                          style={{ scale: 1.3 }}
-                        />
-                        <motion.div
-                          className="absolute inset-0 border border-dashed border-yellow-500/20 rounded-full"
-                          animate={{ rotate: -360 }}
-                          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                          style={{ scale: 1.5 }}
-                        />
-                      </motion.div>
-
-                      {/* Name */}
-                      <motion.h3
-                        className="text-3xl font-bold text-white mb-2"
-                        initial={{ y: 20, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        viewport={{ once: false }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
-                      >
-                        Ravi Ranjan
-                      </motion.h3>
-
-                      {/* Role */}
-                      <motion.p
-                        className="text-amber-400 font-mono text-sm tracking-widest uppercase mb-6"
-                        initial={{ y: 20, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        viewport={{ once: false }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
-                      >
-                        Full Stack Developer
-                      </motion.p>
-
-                      {/* Location */}
-                      <motion.div
-                        className="flex items-center gap-2 text-neutral-400 text-sm"
-                        initial={{ y: 20, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        viewport={{ once: false }}
-                        transition={{ delay: 0.5, duration: 0.6 }}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Bihar, India</span>
-                      </motion.div>
-
-                      {/* Decorative dots */}
-                      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
-                        {[...Array(3)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className="w-2 h-2 rounded-full bg-amber-500/50"
-                            animate={{
-                              scale: [1, 1.5, 1],
-                              opacity: [0.5, 1, 0.5],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              delay: i * 0.3,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                </SectionReveal>
-
-                {/* Philosophy Card */}
-                <SectionReveal delay={0.4}>
-                  <motion.div
-                    className="relative p-8 rounded-2xl border border-neutral-800 bg-neutral-900/30 backdrop-blur-sm overflow-hidden"
-                    whileHover={{ 
-                      borderColor: "rgba(212,175,55,0.5)",
-                      backgroundColor: "rgba(212,175,55,0.05)"
-                    }}
-                  >
-                    <div className="absolute top-0 left-0 w-12 h-12">
-                      <svg className="text-amber-500/20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
-                      </svg>
-                    </div>
-
-                    <blockquote className="relative z-10 pt-4">
-                      <p className="text-lg text-neutral-300 leading-relaxed italic mb-4">
-                        "Technology evolves rapidly—and so do I. Every project is an opportunity 
-                        to push boundaries, learn something new, and create experiences that matter."
-                      </p>
-                      <footer className="text-sm text-neutral-500 font-mono">
-                        — Personal Philosophy
-                      </footer>
-                    </blockquote>
-                  </motion.div>
-                </SectionReveal>
-
-                {/* Status Indicator */}
-                <SectionReveal delay={0.5}>
-                  <motion.div
-                    className="flex items-center gap-3 p-4 rounded-xl border border-neutral-800 bg-neutral-900/30 backdrop-blur-sm"
-                    whileHover={{ borderColor: "rgba(34,197,94,0.5)" }}
-                  >
-                    <motion.div
-                      className="w-3 h-3 rounded-full bg-green-500"
-                      animate={{
-                        boxShadow: [
-                          "0 0 0 0 rgba(34,197,94,0.7)",
-                          "0 0 0 10px rgba(34,197,94,0)",
-                        ],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                      }}
-                    />
-                    <span className="text-sm text-neutral-400">
-                      Available for freelance opportunities
-                    </span>
-                  </motion.div>
-                </SectionReveal>
+          <MagneticCard
+            as="div"
+            draggable
+            className="relative cursor-grab rounded-[1.7rem] border border-[#6d6253] bg-[#121211] shadow-[0_32px_90px_rgba(0,0,0,0.5)] transition-colors duration-300 active:cursor-grabbing hover:border-[#a5885b]"
+          >
+            <div className="flex items-center justify-between border-b border-[#51493f] px-5 py-4">
+              <div className="flex gap-2">
+                {["Dev", "Design", "Editor"].map((item) => (
+                   <MagneticButton key={item} active={activeTab === item} onClick={() => setActiveTab(item)}>
+                      {item}
+                   </MagneticButton>
+                ))}
+              </div>
+              <div className="hidden gap-2 sm:flex">
+                <span className="rounded-md border border-[#4f473d] px-3 py-2 text-[#9d968a]">...</span>
+                <span className="rounded-md border border-[#4f473d] px-3 py-2 text-[#9d968a]">DRAG</span>
               </div>
             </div>
-          </div>
+
+            <div className="p-5 sm:p-6 relative">
+              <div className="overflow-hidden rounded-[1.25rem] border border-[#4b443a] bg-[#191917]">
+                <div className="grid gap-0 lg:grid-cols-[170px_minmax(0,1fr)]">
+                  <div className="border-b border-[#3f3931] p-4 lg:border-b-0 lg:border-r overflow-hidden group/img">
+                    <StopMotionImage />
+                    
+                    <div className="mt-4 rounded-lg border border-[#37322b] bg-[#141412] p-4">
+                      <span className="mb-3 block h-1 w-20 rounded-full bg-[#6f6659]" />
+                      <span className="mb-2 block h-1 w-28 rounded-full bg-[#565044]" />
+                      <span className="mb-2 block h-1 w-16 rounded-full bg-[#565044]" />
+                      <span className="block h-1 w-24 rounded-full bg-[#37322b]" />
+                    </div>
+                  </div>
+
+                  <div className="min-h-[320px] relative">
+                    <div className="flex items-center gap-4 border-b border-[#403a32] px-6 py-5">
+                      <span className="flex h-8 w-8 items-center justify-center rounded border border-[#b59765] bg-[#d5bb85] text-[#11100e]">
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+                          <path d="M5 15c6 0 9-3 9-9" />
+                          <path d="M14 6h5v5" />
+                          <path d="M4 20h16" />
+                        </svg>
+                      </span>
+                      <h3 className="text-2xl font-black tracking-[-0.03em] text-[#f1e7d8]">
+                        Ravi Ranjan
+                      </h3>
+                    </div>
+                    <TerminalReveal activeTab={activeTab} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end border-t border-[#4b443a] px-5 py-3 text-xs font-black uppercase tracking-[0.26em] text-[#d7c198]">
+                   {activeTab} Mode
+                  <span className="ml-4 h-px w-12 bg-[#b59765]" />
+                </div>
+              </div>
+            </div>
+          </MagneticCard>
         </div>
 
-        {/* Bottom section */}
-        <div className="px-6 md:px-12 lg:px-20 pb-20">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="h-px w-full bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: false }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-            />
+        <MotionDiv
+          className="mt-12 rounded-[1.8rem] border border-[#6d6253] bg-[#10100f] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.38)] sm:p-8"
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.22 }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="grid gap-5 lg:grid-cols-3">
+            {disciplines.map((item) => (
+              <MagneticCard
+                key={item.title}
+                className="group rounded-[1.15rem] relative overflow-hidden border border-[#4d453b] bg-[#151513] p-6 transition-colors duration-300 hover:border-[#a5885b] hover:bg-[#191815]"
+              >
+                {/* Micro hover gradient inside cards */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="mb-6 flex items-center gap-4 relative z-10">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-md border border-[#a5885b] text-[#e0c390]">
+                    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round">
+                      <MotionPath
+                        d={item.icon}
+                        pathLength={1}
+                        initial={{ pathLength: 1 }}
+                        whileHover={{ pathLength: 1 }}
+                        className="[stroke-dasharray:1] [stroke-dashoffset:0] group-hover:[animation:about-draw_0.9s_ease_forwards]"
+                      />
+                    </svg>
+                  </span>
+                  <h3 className="text-2xl font-black uppercase tracking-[-0.03em] text-[#eee6d8]">
+                    {item.title}
+                  </h3>
+                </div>
+                <p className="min-h-24 border-t border-[#3e3931] pt-6 relative z-10 text-lg leading-8 text-[#cbc2b4] transition-colors duration-300 group-hover:text-[#efe5d7]">
+                  {item.body}
+                </p>
+                <p className="mt-6 border-t border-[#3e3931] pt-4 relative z-10 text-base text-[#bda77f]">
+                  - {item.meta}
+                </p>
+              </MagneticCard>
+            ))}
           </div>
-        </div>
+        </MotionDiv>
       </div>
+
+      <style>{`
+        @keyframes about-draw {
+          0% {
+            stroke-dashoffset: 1;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
     </section>
   );
 };
